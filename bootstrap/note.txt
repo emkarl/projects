@@ -1,0 +1,3 @@
+docker build -t python_image .
+
+docker run -v $PWD:/app -t python_image
