@@ -85,10 +85,6 @@ def do_one_res_bootstrap(n, slope_hat, residuals):
 
     return T
 
-def residual_bootstrap_void(alpha, n, B):
-    data = AR.generate_sample(nsample = n + 1)
-    return 0
-
 def residual_bootstrap(alpha, n, B):
     data = AR.generate_sample(nsample = n + 1)
     x = data[0:(n-1)]
@@ -99,19 +95,13 @@ def residual_bootstrap(alpha, n, B):
     t_hat = (slope - beta) / stderr
     residuals = y - slope*x
 
-    t_samp = np.array([residual_bootstrap_void(n, slope, residuals) for i in range(B)])
+    t_samp = np.array([do_one_res_bootstrap(n, slope, residuals) for i in range(B)])
 
     p = calc_p(t_hat, t_samp, B)
 
     if(p < alpha):
         return 1
     return 0
-
-@timer
-def residual_bootstrap_simulation_old(alpha, n, replications, B):
-    results = [residual_bootstrap(alpha, n, B) for i in range(replications)]
-    r = ft.reduce(lambda a,b: a + b, results, 0)
-    return(r / replications)
 
 @timer
 def residual_bootstrap_simulation(alpha, n, replications, B):
@@ -130,21 +120,6 @@ def wild_bootstrap(alpha, n, B):
         result = stats.linregress(x,y)
 
 ############################################################
-
-def do_one_pairs_bootstrap_void(beta_hat, x, y, index):
-    index_r = index
-    slope = solve(x[index_r],y[index_r])
-    stderr = calc_StdErr(slope,x[index_r],y[index_r])
-
-    while stderr == 0:
-        # this is for the case we have only selected two kind of row
-        index_r = np.random.choice(index, len(index))
-        slope = solve(x[index_r],y[index_r])
-        stderr = calc_StdErr(slope,x[index_r],y[index_r])
-
-    T = (slope - beta_hat) / stderr
-
-    return T
 
 def do_one_pairs_bootstrap(beta_hat, x, y, index):
     index_r = np.random.choice(index, len(index))
